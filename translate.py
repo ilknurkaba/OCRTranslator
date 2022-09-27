@@ -11,13 +11,6 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tess
 X1, Y1, X2, Y2 = 0, 0, 1, 1
 tempX1, tempY1, tempX2, tempY2 = 0, 0, 0, 0
 
-def onRelease(key):
-
-  global tempX2, tempY2
-
-  if key == keyboard.Key.shift:
-    tempX2, tempY2 = pyautogui.position()
-
 def onPress(key):
 
   global X1, Y1, X2, Y2
@@ -30,24 +23,30 @@ def onPress(key):
   except:
       charKey = None
 
-  if key == keyboard.Key.shift:
+  if key == keyboard.Key.shift_l:
     tempX1, tempY1 = pyautogui.position()
+  elif key == keyboard.Key.ctrl_l:
+    tempX2, tempY2 = pyautogui.position()
   elif charKey in ["y", "Y"]:
     X1, Y1, X2, Y2 = tempX1, tempY1, tempX2, tempY2
 
-    pyscreenshot.grab(bbox=(X1, Y1, X2, Y2)).save("clip.jpg")
-    setDPI300("clip.jpg")
-    clip = Image.open("clip.jpg")
-    ocrString = pytesseract.image_to_string(clip)
-    ocrString = ocrString.replace("-\n", "")
-    ocrString = ocrString.replace("\n", " ")
-    ocrString = ocrString.replace(".", ".\n")
-
     try:
-      print(translator.translate(ocrString, dest="tr").text)
-      print("-----------------------------------------")
-    except:
-      pass
+      pyscreenshot.grab(bbox=(X1, Y1, X2, Y2)).save("clip.jpg")
+      setDPI300("clip.jpg")
+      clip = Image.open("clip.jpg")
+      ocrString = pytesseract.image_to_string(clip)
+      ocrString = ocrString.replace("-\n", "")
+      ocrString = ocrString.replace("\n", " ")
+      # ocrString = ocrString.replace(".", ".\n")
+
+      try:
+        print(translator.translate(ocrString, dest="tr").text)
+        print("-----------------------------------------")
+      except:
+        pass
+    except ValueError:
+      print("hatali alan, tekrar deneyin")
+    
 
 
 def setDPI300(file_path):
@@ -59,7 +58,7 @@ def setDPI300(file_path):
   im_resized.save(file_path, dpi=(300, 300))
 
 
-keyboard.Listener(on_press=onPress, on_release=onRelease).start()
+keyboard.Listener(on_press=onPress).start()
 
 while True:
   sleep(3)
